@@ -18,23 +18,38 @@ app.get("/", async (req, res) => {
   res.send("API - SIEG");
 });
 
-app.post('/save', (req, res) => {
+//CRIAR USUÁRIO PARA ACESSO AO SISTEMA SIEG
+
+app.post('/createPerson', (req, res) => {
   const data = req.body;
-  const sql = `INSERT INTO students (name, dob, degree, course) VALUES ('${data.name}', '${data.dob}', '${data.degree}', '${data.course}')`;
+  const sql = `INSERT INTO Pessoa (nome, cpf, email) VALUES ('${data.nome}', '${data.cpf}', '${data.email}')`;
   connection.query(sql, (err, result) => {
     if (err) throw err;
-    res.json({ message: 'Data saved successfully' });
+    res.json({ id_pessoa: result.insertId });
   });
 });
 
-app.put('/update', (req, res) => {
+//BUSCAR TODOS OS EGRESSOS CADASTRADOS NO SISTEMA
+
+app.get('/getAllEgressos', (req, res) => {
   const data = req.body;
-  const sql = `UPDATE students SET name = '${data.name}', dob = '${data.dob}', degree = '${data.degree}', course = '${data.course}' WHERE id = ${data.id}`;
+  const sql = `select * from Egresso eg inner join Pessoa p on p.id_pessoa = eg.id_pessoa `;
   connection.query(sql, (err, result) => {
     if (err) throw err;
-    res.json({ message: 'Data updated successfully' });
+    res.json({ result });
   });
 });
+
+//
+
+// app.put('/update', (req, res) => {
+//   const data = req.body;
+//   const sql = `UPDATE students SET name = '${data.name}', dob = '${data.dob}', degree = '${data.degree}', course = '${data.course}' WHERE id = ${data.id}`;
+//   connection.query(sql, (err, result) => {
+//     if (err) throw err;
+//     res.json({ message: 'Data updated successfully' });
+//   });
+// });
 
 app.delete('/delete/:id', (req, res) => {
   const sql = `DELETE FROM students WHERE id = ${req.params.id}`;
