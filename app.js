@@ -18,14 +18,18 @@ app.get("/", async (req, res) => {
   res.send("API - SIEG");
 });
 
-//CRIAR USUÁRIO PARA ACESSO AO SISTEMA SIEG
+//CRIAR EGRESSO PARA ACESSO AO SISTEMA SIEG
 
-app.post('/createPerson', (req, res) => {
+app.post('/createEgresso', (req, res) => {
   const data = req.body;
   const sql = `INSERT INTO Pessoa (nome, cpf, email) VALUES ('${data.nome}', '${data.cpf}', '${data.email}')`;
   connection.query(sql, (err, result) => {
-    if (err) throw err;
-    res.json({ id_pessoa: result.insertId });
+
+    const sql2 = `INSERT INTO Egresso (id_pessoa, data_nascimento, entrada_ufu, saida_ufu, tempo_curso, tempo_formado, bolsas, estagios_area, trabalha_area_atualmente, quantos_empregos_area, experiencia_profissional, last_update) VALUES ('${result.insertId}', '${data.data_nascimento}', '${data.entrada_ufu}', '${data.saida_ufu}', '${data.tempo_curso}', '${data.tempo_formado}', '${data.bolsas}', '${data.estagios_area}', '${data.trabalha_area_atualmente}', '${data.quantos_empregos_area}', '${data.experiencia_profissional}', '${data.last_update}')`;
+    connection.query(sql2, (err, result) => {
+      if (err) throw err;
+      res.json({ result: true });
+    });
   });
 });
 
@@ -33,29 +37,21 @@ app.post('/createPerson', (req, res) => {
 
 app.get('/getAllEgressos', (req, res) => {
   const data = req.body;
-  const sql = `select * from Egresso eg inner join Pessoa p on p.id_pessoa = eg.id_pessoa `;
+  const sql = `select * from Egresso eg inner join Pessoa p on p.id_pessoa = eg.id_pessoa LIMIT 10 OFFSET ${data.offset} `;
   connection.query(sql, (err, result) => {
     if (err) throw err;
     res.json({ result });
   });
 });
 
-//
+//UPDATE EGRESSO
 
-// app.put('/update', (req, res) => {
-//   const data = req.body;
-//   const sql = `UPDATE students SET name = '${data.name}', dob = '${data.dob}', degree = '${data.degree}', course = '${data.course}' WHERE id = ${data.id}`;
-//   connection.query(sql, (err, result) => {
-//     if (err) throw err;
-//     res.json({ message: 'Data updated successfully' });
-//   });
-// });
-
-app.delete('/delete/:id', (req, res) => {
-  const sql = `DELETE FROM students WHERE id = ${req.params.id}`;
+app.put('/update', (req, res) => {
+  const data = req.body;
+  const sql = `UPDATE Egresso eg INNER JOIN Pessoa pe ON pe.id_pessoa = eg.id_pessoa SET trabalha_area_atualmente = '${data.trabalha_area_atualmente}', quantos_empregos_area = '${data.quantos_empregos_area}', experiencia_profissional = '${data.experiencia_profissional}', last_update = '${data.last_update}', bolsas = '${data.bolsas}' WHERE pe.cpf = '${data.cpf}'`;
   connection.query(sql, (err, result) => {
     if (err) throw err;
-    res.json({ message: 'Data deleted successfully' });
+    res.json({ message: 'Data updated successfully' });
   });
 });
 
